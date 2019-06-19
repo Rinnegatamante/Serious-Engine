@@ -224,13 +224,14 @@ MY_STATIC_ASSERT(size_tSize, sizeof(size_t) == sizeof(void*));
 
     // !!! FIXME : Should inline functions go somewhere else?
 
-    inline void _strupr(char *str)
+    inline char *_strupr(char *str)
     {
         if (str != NULL)
         {
             for (char *ptr = str; *ptr; ptr++)
                *ptr = toupper(*ptr);
         }
+        return str;
     }
 
     inline ULONG _rotl(ULONG ul, int bits)

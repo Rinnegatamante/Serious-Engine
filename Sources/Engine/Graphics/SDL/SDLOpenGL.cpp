@@ -32,10 +32,12 @@ BOOL CGfxLibrary::InitDriver_OGL(BOOL init3dfx)
 {
   ASSERT( gl_hiDriver==NONE);  // this is managed inside SDL, so we never load a library ourselves.
 
+#ifndef PLATFORM_SWITCH // GL is statically linked
   if (SDL_GL_LoadLibrary(NULL) == -1) {
     sdlCheckError(0, "Failed to load OpenGL API");
     return FALSE;
   }
+#endif
 
   // done
   return TRUE;
@@ -109,6 +111,12 @@ BOOL CGfxLibrary::SetupPixelFormat_OGL( HDC hdc, BOOL bReport/*=FALSE*/)
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, gap_iDepthBits);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, gap_iStencilBits);
+
+#ifdef PLATFORM_SWITCH
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#endif
 
   STUBBED("co-opt the existing T-buffer support for multisampling?");
   //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, x);

@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // !!! FIXME: rcg01082002 Do something with these.
 #ifdef PLATFORM_UNIX
   #include <Engine/Base/SDL/SDLEvents.h>
-  #if !defined(PLATFORM_MACOSX) && !defined(PLATFORM_FREEBSD)
+  #if !defined(PLATFORM_MACOSX) && !defined(PLATFORM_FREEBSD) && !defined(PLATFORM_SWITCH)
     #include <mntent.h>
   #endif
 #endif

@@ -125,10 +125,17 @@ static void OV_SetFunctionPointers_t(void) {
   const char *strName;
   // get vo function pointers
 
+#ifdef STATIC_LIBVORBIS
+  #define DLLFUNCTION(dll, output, name, inputs, params, required) \
+    strName = #name ;  \
+    p##name = (output (__cdecl *) inputs) (void *) name; \
+    if(p##name == NULL) FailFunction_t(strName);
+#else
   #define DLLFUNCTION(dll, output, name, inputs, params, required) \
     strName = #name ;  \
     p##name = (output (__cdecl *) inputs) _hOV->FindSymbol(strName); \
     if(p##name == NULL) FailFunction_t(strName);
+#endif
   #include "ov_functions.h"
   #undef DLLFUNCTION
 }
@@ -208,6 +215,7 @@ void CSoundDecoder::InitPlugins(void)
 {
   try {
     // load vorbis
+    #ifndef STATIC_LIBVORBIS
     if (_hOV==NULL) {
        #if ((defined PLATFORM_WIN32) && (defined NDEBUG))
          #define VORBISLIB "vorbisfile_d"
@@ -223,6 +231,9 @@ void CSoundDecoder::InitPlugins(void)
          ThrowF_t(TRANS("Cannot load " VORBISLIB " shared library: %s."), _hOV->GetError());
        }
     }
+    #else
+        #define VORBISLIB "libvorbisfile (statically linked)"
+    #endif
 
     // prepare function pointers
     OV_SetFunctionPointers_t();
@@ -272,8 +283,10 @@ void CSoundDecoder::EndPlugins(void)
   // cleanup vorbis when not needed anymore
   if (_bOVEnabled) {
     OV_ClearFunctionPointers();
+    #ifndef STATIC_LIBVORBIS
     delete _hOV;
     _hOV = NULL;
+    #endif
     _bOVEnabled = FALSE;
   }
 }

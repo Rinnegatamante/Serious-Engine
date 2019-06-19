@@ -164,6 +164,5 @@ ENGINE_API void RM_RemoveFlag(ULONG ulFlag);
 ENGINE_API ULONG &RM_GetRenderFlags();
 ENGINE_API void RM_DoFogAndHaze(BOOL bOpaque);
 
-
 #endif  /* include-once check. */
 

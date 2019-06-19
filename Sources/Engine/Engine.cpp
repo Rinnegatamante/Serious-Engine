@@ -49,6 +49,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "SDL.h"
 #endif
 
+#if PLATFORM_SWITCH
+
+#include <switch.h>
+
+static int nxlink_sock = -1;
+
+extern "C" void userAppInit(void) {
+  socketInitializeDefault();
+  nxlink_sock = nxlinkStdio();
+}
+
+extern "C" void userAppExit(void) {
+  if (nxlink_sock >= 0)
+    close(nxlink_sock);
+  socketExit();
+}
+
+#endif
+
 // this version string can be referenced from outside the engine
 ENGINE_API CTString _strEngineBuild  = "";
 ENGINE_API ULONG _ulEngineBuildMajor = _SE_BUILD_MAJOR;
@@ -132,8 +151,9 @@ static void DetectCPU(void)
   CPrintF(TRANSV("  (No CPU detection in this binary.)\n"));
   #ifdef PLATFORM_PANDORA
   sys_iCPUMHz = 400;    // conservative, ARM -> x86 cpu translation is not 1 to 1.
+  #elif defined PLATFORM_SWITCH
+  sys_iCPUMHz = 1000;   // maybe use this for OC
   #endif
-
 #else
   strVendor[12] = 0;
   ULONG ulTFMS = 0;
@@ -224,6 +244,7 @@ static void DetectCPU(void)
   sys_iCPUMHz = INDEX(_pTimer->tm_llCPUSpeedHZ/1E6);
 
   if( !bMMX) FatalError( TRANS("MMX support required but not present!"));
+#endif
 }
 
 static void DetectCPUWrapper(void)

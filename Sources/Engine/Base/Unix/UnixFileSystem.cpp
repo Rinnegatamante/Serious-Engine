@@ -77,8 +77,13 @@ BOOL CFileSystem::IsDirectory(const char *fname)
 
 CUnixFileSystem::CUnixFileSystem(const char *argv0, const char *gamename)
 {
+#ifdef PLATFORM_SWITCH
+    exePath = SDL_strdup(argv0);
+    userDir = SDL_strdup("./");
+#else
     exePath = SDL_GetBasePath();
     userDir = SDL_GetPrefPath("Serious Engine", gamename);
+#endif
 }
 
 

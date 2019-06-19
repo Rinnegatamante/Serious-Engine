@@ -35,6 +35,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma comment(lib, "wsock32.lib")
 #endif
 
+#ifdef PLATFORM_SWITCH
+// some missing definitions
+#define ESOCKTNOSUPPORT 44
+#endif
+
 #define SLASHSLASH  0x2F2F   // looks like "//" in ASCII.
 
 #define SERVER_LOCAL_CLIENT     0
@@ -46,7 +51,7 @@ extern FLOAT net_fDropPackets;
 extern FLOAT net_tmConnectionTimeout;
 extern INDEX net_bReportPackets;
 
-static struct ErrorCode ErrorCodes[] = {
+static struct ErrorCodeInfo ErrorCodes[] = {
 #ifdef PLATFORM_WIN32
   ERRORCODE(WSAEINTR          , "WSAEINTR"),
   ERRORCODE(WSAEBADF          , "WSAEBADF"),

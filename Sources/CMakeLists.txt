@@ -10,12 +10,12 @@ option(USE_SYSTEM_ZLIB "Use systems zlib development files" On)
 
 # fallback for cmake versions without add_compile_options # RAKE! Borrowed from dhewm3 project
 if(NOT COMMAND add_compile_options)
-	function(add_compile_options)
-		foreach(arg ${ARGN})
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${arg}" PARENT_SCOPE)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${arg}" PARENT_SCOPE)
-		endforeach()
-	endfunction()
+  function(add_compile_options)
+    foreach(arg ${ARGN})
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${arg}" PARENT_SCOPE)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${arg}" PARENT_SCOPE)
+    endforeach()
+  endfunction()
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -34,7 +34,7 @@ if(NOT USE_SYSTEM_SDL2)
 else()
     find_package(SDL2 REQUIRED)
     if(SDL2_FOUND)
-	include_directories(${SDL2_INCLUDE_DIR})
+  include_directories(${SDL2_INCLUDE_DIR})
     else()
         message(FATAL_ERROR "Error USE_SYSTEM_SDL2 is set but neccessary developer files are missing")
     endif()
@@ -58,124 +58,139 @@ if(CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" OR CMAKE_INSTALL_PREFIX STREQUAL "
 endif()
 
 # Set up some sanity stuff...
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "GNU|kFreeBSD")
+if(NOT SWITCH_LIBNX)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES "GNU|kFreeBSD")
     SET(LINUX TRUE)
-endif()
-if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+  endif()
+  if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     SET(FREEBSD TRUE)
-endif()
-if(APPLE)
+  endif()
+  if(APPLE)
     SET(MACOSX TRUE)
-endif()
-if(MSVC)
+  endif()
+  if(MSVC)
     SET(WINDOWS TRUE)
+  endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "None Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 SET(DEBUG FALSE)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    SET(DEBUG TRUE)
+  SET(DEBUG TRUE)
 endif()
 
 ## ** RAKE! start compiler specific flags section **
 ## ** RAKE! Borrowed from dhewm3 project, need to **
 ## ** RAKE! clean up for SeriousEngine use. Also  **
-## ** RAKE! need to make this pandora safe.	  **
+## ** RAKE! need to make this pandora safe.    **
 # compiler specific flags
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-	# This section and the like are for flags/defines that can be shared between 
-	# c and c++ compile options
-	add_compile_options(-Wall)
-	add_compile_options(-pipe)
-	add_compile_options(-fPIC)
-	add_compile_options(-march=native)
-        add_compile_options(-fno-strict-aliasing)
-	add_definitions(-D_REENTRANT=1)
-	add_definitions(-D_MT=1)
+  # This section and the like are for flags/defines that can be shared between 
+  # c and c++ compile options
+  add_compile_options(-Wall)
+  add_compile_options(-pipe)
+  add_compile_options(-fPIC)
+  if(NOT SWITCH_LIBNX)
+    add_compile_options(-march=native)
+  endif()
+  add_compile_options(-fno-strict-aliasing)
+  add_definitions(-D_REENTRANT=1)
+  add_definitions(-D_MT=1)
 
-        ## Add your custom C and CXX flags on the command line aka -DCMAKE_C_FLAGS=-std=c98 or -DCMAKE_CXX_FLAGS=-std=c++11
+  ## Add your custom C and CXX flags on the command line aka -DCMAKE_C_FLAGS=-std=c98 or -DCMAKE_CXX_FLAGS=-std=c++11
 
-	## For C flags
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -D_DEBUG=1 -DDEBUG=1 -O0")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -O3 -fno-unsafe-math-optimizations")
-        set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -g -O3 -fno-unsafe-math-optimizations")
-        set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -Os -fno-unsafe-math-optimizations")
+  ## For C flags
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -D_DEBUG=1 -DDEBUG=1 -O0")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -O3 -fno-unsafe-math-optimizations")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -g -O3 -fno-unsafe-math-optimizations")
+    set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -Os -fno-unsafe-math-optimizations")
 
-	## For C++ flags
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -D_DEBUG=1 -DDEBUG=1 -O0")
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -O3 -fno-unsafe-math-optimizations")
-        set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -g -O3 -fno-unsafe-math-optimizations") ## RAKE! Does -DNDEBUG=1 and -D_NDEBUG=1 mess with RelWithDebInfo?
-        set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -Os -fno-unsafe-math-optimizations")
+  ## For C++ flags
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -D_DEBUG=1 -DDEBUG=1 -O0")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -O3 -fno-unsafe-math-optimizations")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -g -O3 -fno-unsafe-math-optimizations") ## RAKE! Does -DNDEBUG=1 and -D_NDEBUG=1 mess with RelWithDebInfo?
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS} -DNDEBUG=1 -D_NDEBUG=1 -Os -fno-unsafe-math-optimizations")
 
-	# TODO fix these warnings
-	add_compile_options(-Wno-switch)
-	add_compile_options(-Wno-char-subscripts)
-	add_compile_options(-Wno-unknown-pragmas)
-	add_compile_options(-Wno-unused-variable) # TODO: maybe only enable this for Entities
-	add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
-	add_compile_options(-Wno-missing-braces)
-	add_compile_options(-Wno-overloaded-virtual)
-	add_compile_options(-Wno-invalid-offsetof)
-	MESSAGE(WARNING, "re-enable some of the warnings some day!")
+  # TODO fix these warnings
+  add_compile_options(-Wno-switch)
+  add_compile_options(-Wno-char-subscripts)
+  add_compile_options(-Wno-unknown-pragmas)
+  add_compile_options(-Wno-unused-variable) # TODO: maybe only enable this for Entities
+  add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
+  add_compile_options(-Wno-missing-braces)
+  add_compile_options(-Wno-overloaded-virtual)
+  add_compile_options(-Wno-invalid-offsetof)
+  MESSAGE(WARNING, "re-enable some of the warnings some day!")
 
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
-		# !!! FIXME: turn a bunch of these off, this is just for now. I hope.  --ryan.
-		add_compile_options(-Wno-c++11-compat-deprecated-writable-strings)
-	endif()
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+    # !!! FIXME: turn a bunch of these off, this is just for now. I hope.  --ryan.
+    add_compile_options(-Wno-c++11-compat-deprecated-writable-strings)
+  endif()
 
-	if(MACOSX)
-		add_definitions(-DPLATFORM_UNIX=1)
-    		add_definitions(-DPLATFORM_MACOSX=1)
-    		add_definitions(-DPRAGMA_ONCE=1)
-	elseif(WINDOWS)
-		add_definitions(-DPLATFORM_WIN32=1)
-    		add_definitions(-DPRAGMA_ONCE=1)
-                add_definitions(-D_CRT_SECURE_NO_WARNINGS=1)
-                add_definitions(-D_CRT_SECURE_NO_DEPRECATE=1)
-	elseif(LINUX)
-	    	set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
-    		add_definitions(-DPLATFORM_UNIX=1)
-    		add_definitions(-D_FILE_OFFSET_BITS=64)
-    		add_definitions(-D_LARGEFILE_SOURCE=1)
-    		add_definitions(-DPRAGMA_ONCE=1)
-	elseif(FREEBSD)
-    		set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
-    		add_definitions(-DPLATFORM_UNIX=1)
-    		add_definitions(-DPLATFORM_FREEBSD=1)
-    		add_definitions(-D_FILE_OFFSET_BITS=64)
-    		add_definitions(-D_LARGEFILE_SOURCE=1)
-    		add_definitions(-DPRAGMA_ONCE=1)
-    		include_directories("/usr/local/include")
-	endif()
-	
-        if(MACOSX OR LINUX OR FREEBSD)
-		add_compile_options(-pthread)
-                add_compile_options(-fsigned-char)
-	endif()
+  if(MACOSX)
+    add_definitions(-DPLATFORM_UNIX=1)
+    add_definitions(-DPLATFORM_MACOSX=1)
+    add_definitions(-DPRAGMA_ONCE=1)
+  elseif(WINDOWS)
+    add_definitions(-DPLATFORM_WIN32=1)
+    add_definitions(-DPRAGMA_ONCE=1)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS=1)
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE=1)
+  elseif(LINUX)
+    set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
+    add_definitions(-DPLATFORM_UNIX=1)
+    add_definitions(-D_FILE_OFFSET_BITS=64)
+    add_definitions(-D_LARGEFILE_SOURCE=1)
+    add_definitions(-DPRAGMA_ONCE=1)
+  elseif(FREEBSD)
+    set(CMAKE_SKIP_RPATH ON CACHE BOOL "Skip RPATH" FORCE)
+    add_definitions(-DPLATFORM_UNIX=1)
+    add_definitions(-DPLATFORM_FREEBSD=1)
+    add_definitions(-D_FILE_OFFSET_BITS=64)
+    add_definitions(-D_LARGEFILE_SOURCE=1)
+    add_definitions(-DPRAGMA_ONCE=1)
+    include_directories("/usr/local/include")
+  elseif(SWITCH_LIBNX)
+    add_definitions(-D__SWITCH__=1)
+    add_definitions(-DSTATIC_LIBVORBIS=1)
+    add_definitions(-DPLATFORM_UNIX=1)
+    add_definitions(-DPLATFORM_SWITCH=1)
+    add_definitions(-D_FILE_OFFSET_BITS=64)
+    add_definitions(-D_LARGEFILE_SOURCE=1)
+    add_definitions(-DPRAGMA_ONCE=1)
+    include_directories("$ENV{PORTLIBS_PREFIX}/include")
+    include_directories("$ENV{DEVKITPRO}/libnx/include")
+    add_compile_options(-fsigned-char -Wno-strict-aliasing -Wfatal-errors -Wno-sign-compare)
+  endif()
 
-	if(CMAKE_COMPILER_IS_GNUCC)
-	    	# !!! FIXME: turn a bunch of these off, this is just for now. I hope.  --ryan.
-    		add_compile_options(-Wno-invalid-offsetof)
-	endif()
+  if(MACOSX OR LINUX OR FREEBSD)
+    add_compile_options(-pthread)
+    add_compile_options(-fsigned-char)
+  endif()
+
+  if(CMAKE_COMPILER_IS_GNUCC)
+    # !!! FIXME: turn a bunch of these off, this is just for now. I hope.  --ryan.
+    add_compile_options(-Wno-invalid-offsetof)
+  endif()
 
 elseif(MSVC) # RAKE! I don't know if this will build with MSVC
-	add_compile_options(/W4)
-	add_compile_options(/wd4100) # unreferenced formal parameter
-	add_compile_options(/wd4127) # conditional expression is constant
-	add_compile_options(/wd4244) # possible loss of data
-	add_compile_options(/wd4245) # signed/unsigned mismatch
-	add_compile_options(/wd4267) # possible loss of data
-	add_compile_options(/wd4714) # 'function' marked as __forceinline not inlined
-	add_compile_options(/wd4996) # 'function': was declared deprecated
-	add_compile_options(/wd4068) # unknown pragma
+  add_compile_options(/W4)
+  add_compile_options(/wd4100) # unreferenced formal parameter
+  add_compile_options(/wd4127) # conditional expression is constant
+  add_compile_options(/wd4244) # possible loss of data
+  add_compile_options(/wd4245) # signed/unsigned mismatch
+  add_compile_options(/wd4267) # possible loss of data
+  add_compile_options(/wd4714) # 'function' marked as __forceinline not inlined
+  add_compile_options(/wd4996) # 'function': was declared deprecated
+  add_compile_options(/wd4068) # unknown pragma
         set(CMAKE_C_FLAGS_DEBUG "-D_DEBUG /Od /Zi /MDd")
-	set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")
-	set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os /MD")
+  set(CMAKE_C_FLAGS_RELEASE "/Ox /Oy /MD")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Ox /Oy /Zi /MD")
+  set(CMAKE_C_FLAGS_MINSIZEREL "/Ox /Oy /Os /MD")
 else()
-	message(FATAL_ERROR "Unsupported compiler")
+  message(FATAL_ERROR "Unsupported compiler")
 endif()
 
 ## ** RAKE! end compiler specific flags section **
@@ -302,6 +317,7 @@ macro(entity _NAME)
     list(APPEND ENTITIES_H "${CMAKE_CURRENT_SOURCE_DIR}/${_NAME}.h")
     list(APPEND ENTITIES_H "${CMAKE_CURRENT_SOURCE_DIR}/${_NAME}_tables.h")
 endmacro()
+
 
 set(ENTITIES_CPP "")
 set(ENTITIES_H "")
@@ -582,34 +598,43 @@ endif()
 add_custom_target(ParseEntities DEPENDS ${ENTITIES_H})
 
 set(ENTITIESMPLIB "Entities${MP}${DEBUGSUFFIX}")
+set(ENTITIESMPLIB_CPP "")
 if(TFE)
- add_library(${ENTITIESMPLIB} SHARED
-     ${ENTITIES_CPP}
-     Entities/Common/Common.cpp
-     Entities/Common/Debris.cpp
-     Entities/Common/Particles.cpp
-     Entities/Common/Stats.cpp
-     Entities/Common/PathFinding.cpp
-     Entities/Common/HUD.cpp
- )
+    set(ENTITIESMPLIB_CPP
+        ${ENTITIES_CPP}
+        Entities/Common/Common.cpp
+        Entities/Common/Debris.cpp
+        Entities/Common/Particles.cpp
+        Entities/Common/Stats.cpp
+        Entities/Common/PathFinding.cpp
+        Entities/Common/HUD.cpp
+    )
 else()
- add_library(${ENTITIESMPLIB} SHARED
-     ${ENTITIES_CPP}
-     EntitiesMP/Common/Common.cpp
- 	 EntitiesMP/Common/Particles.cpp
- 	 EntitiesMP/Common/EmanatingParticles.cpp
- 	 EntitiesMP/Common/PathFinding.cpp
- 	 EntitiesMP/Common/HUD.cpp
- )
+    set(ENTITIESMPLIB_CPP
+        ${ENTITIES_CPP}
+        EntitiesMP/Common/Common.cpp
+        EntitiesMP/Common/Particles.cpp
+        EntitiesMP/Common/EmanatingParticles.cpp
+        EntitiesMP/Common/PathFinding.cpp
+        EntitiesMP/Common/HUD.cpp
+    )
+endif()
+
+if(SWITCH_LIBNX)
+    add_library(${ENTITIESMPLIB} STATIC ${ENTITIESMPLIB_CPP})
+else()
+    add_library(${ENTITIESMPLIB} SHARED ${ENTITIESMPLIB_CPP})
 endif()
 
 if(MACOSX)
-    target_link_libraries(${ENTITIESMPLIB} "-undefined dynamic_lookup")
+    target_link_libraries(${ENTITIESMPLIB})
 endif()
+
 add_dependencies(${ENTITIESMPLIB} ParseEntities)
 
+
 set(GAMEMPLIB "Game${MP}${DEBUGSUFFIX}")
-add_library(${GAMEMPLIB} SHARED
+set(GAMEMPLIB_CPP
     GameMP/Camera.cpp
     GameMP/CompMessage.cpp
     GameMP/CompModels.cpp
@@ -623,13 +648,22 @@ add_library(${GAMEMPLIB} SHARED
     GameMP/SessionProperties.cpp
     GameMP/WEDInterface.cpp
 )
-if(MACOSX)
-    target_link_libraries(${GAMEMPLIB} "-undefined dynamic_lookup")
+
+if(SWITCH_LIBNX)
+    add_library(${GAMEMPLIB} STATIC ${GAMEMPLIB_CPP})
+else()
+    add_library(${GAMEMPLIB} SHARED ${GAMEMPLIB_CPP})
 endif()
+
+if(MACOSX)
+    target_link_libraries(${GAMEMPLIB})
+endif()
+
 add_dependencies(${GAMEMPLIB} ParseEntities)
 
+
 set(SHADERSLIB "Shaders${DEBUGSUFFIX}")
-add_library(${SHADERSLIB} SHARED
+set(SHADERSLIB_CPP
     Shaders/AddShader.cpp
     Shaders/AddShaderDS.cpp
     Shaders/BaseShader.cpp
@@ -651,10 +685,19 @@ add_library(${SHADERSLIB} SHARED
     Shaders/StdH.cpp
     Shaders/Translucent.cpp
 )
-if(MACOSX)
-    target_link_libraries(${SHADERSLIB} "-undefined dynamic_lookup")
+
+if(SWITCH_LIBNX)
+    add_library(${SHADERSLIB} STATIC ${SHADERSLIB_CPP})
+else()
+    add_library(${SHADERSLIB} SHARED ${SHADERSLIB_CPP})
 endif()
+
+if(MACOSX)
+    target_link_libraries(${SHADERSLIB})
+endif()
+
 add_dependencies(${SHADERSLIB} ParseEntities)
+
 
 add_parser_and_scanner("Engine/Base/Parser" "Engine/Base/Scanner")
 add_parser_and_scanner("Engine/Ska/smcPars" "Engine/Ska/smcScan")
@@ -736,7 +779,6 @@ set(ENGINE_SRCS
     Engine/Base/Parser.h
     Engine/Base/IFeel.cpp
     Engine/Base/Unix/UnixFileSystem.cpp
-    Engine/Base/Unix/UnixDynamicLoader.cpp
     Engine/Base/SDL/SDLTimer.cpp
     Engine/Base/SDL/SDLInput.cpp
     Engine/Base/SDL/SDLEvents.cpp
@@ -885,6 +927,23 @@ set(ENGINE_SRCS
     ${ZLIB_SRCS}
 )
 
+if(SWITCH_LIBNX)
+    # replace dl with a "fake dynamic loader"
+    set(ENGINE_SRCS ${ENGINE_SRCS}
+        Engine/Base/NX/FakeDynamicLoader.cpp
+        Engine/Entities/FakeExports.cpp
+        GameMP/FakeExports.cpp
+        Shaders/FakeExports.cpp
+    )
+    if(TFE)
+        set(ENGINE_SRCS ${ENGINE_SRCS} Entities/Common/FakeExports.cpp)
+    else()
+        set(ENGINE_SRCS ${ENGINE_SRCS} EntitiesMP/Common/FakeExports.cpp)
+    endif()
+else(SWITCH_LIBNX)
+    set(ENGINE_SRCS ${ENGINE_SRCS} Engine/Base/Unix/UnixDynamicLoader.cpp)
+endif(SWITCH_LIBNX)
+
 add_executable(ssam
     ${ENGINE_SRCS}
     SeriousSam/LevelInfo.cpp
@@ -920,19 +979,19 @@ if(MACOSX)
     if(USE_SYSTEM_SDL2) # use sdl2 framework on system
       target_link_libraries(ssam ${SDL2_LIBRARY})
     else() # use local libsdl2
-	  find_library(COCOA_FRAMEWORK Cocoa)
+    find_library(COCOA_FRAMEWORK Cocoa)
       target_link_libraries(ssam "${COCOA_FRAMEWORK}")
       target_link_libraries(ssam "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
     endif()
     
     if(BUILD_DEDICATED_SERVER)
-		target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
-		if(USE_SYSTEM_SDL2)
-			target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
-		else()
-			target_link_libraries(SeriousSamDedicated "${COCOA_FRAMEWORK}")
-			target_link_libraries(SeriousSamDedicated "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
-		endif()
+    target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
+    if(USE_SYSTEM_SDL2)
+      target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
+    else()
+      target_link_libraries(SeriousSamDedicated "${COCOA_FRAMEWORK}")
+      target_link_libraries(SeriousSamDedicated "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
+    endif()
     endif()
 endif()
 
@@ -944,14 +1003,14 @@ if(LINUX)
     target_link_libraries(ssam ${SDL2_LIBRARY})
     target_link_libraries(ssam ${ZLIB_LIBRARIES})
     if(PANDORA)
-    	target_link_libraries(ssam "rt")
+      target_link_libraries(ssam "rt")
     endif()
     if(BUILD_DEDICATED_SERVER)
         set_target_properties(SeriousSamDedicated PROPERTIES LINK_FLAGS "-Wl,-rpath,$ORIGIN")
         target_link_libraries(SeriousSamDedicated "m")
         target_link_libraries(SeriousSamDedicated "dl")
         target_link_libraries(SeriousSamDedicated "pthread")
-	target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
+        target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
         target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
     endif()
 endif()
@@ -969,6 +1028,33 @@ if(FREEBSD)
         target_link_libraries(SeriousSamDedicated ${SDL2_LIBRARY})
         target_link_libraries(SeriousSamDedicated ${ZLIB_LIBRARIES})
     endif()
+endif()
+
+if(SWITCH_LIBNX)
+    target_link_libraries(ssam ${ENTITIESMPLIB})
+    target_link_libraries(ssam ${GAMEMPLIB})
+    target_link_libraries(ssam ${SHADERSLIB})
+    target_link_libraries(ssam ${SDL2_LIBRARY})
+    target_link_libraries(ssam "vorbisfile")
+    target_link_libraries(ssam "vorbis")
+    target_link_libraries(ssam "ogg")
+    target_link_libraries(ssam ${ZLIB_LIBRARIES})
+    target_link_libraries(ssam "EGL")
+    target_link_libraries(ssam "glapi")
+    target_link_libraries(ssam "drm_nouveau")
+    target_link_libraries(ssam "pthread")
+    target_link_libraries(ssam "nx")
+    target_link_libraries(ssam "m")
+
+    set(NRONAME "ssam_tse")
+    if(TFE)
+        set(NRONAME "ssam_tfe")
+    endif()
+
+    add_custom_command(TARGET ssam POST_BUILD
+      COMMAND aarch64-none-elf-strip -o "${CMAKE_BINARY_DIR}/ssam_stripped" "${CMAKE_BINARY_DIR}/ssam"
+      COMMAND elf2nro "${CMAKE_BINARY_DIR}/ssam_stripped" "${CMAKE_BINARY_DIR}/${NRONAME}.nro" --icon="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg" --nacp="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg"
+    )
 endif()
 
 if(TFE)

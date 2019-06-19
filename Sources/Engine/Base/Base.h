@@ -62,12 +62,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   #endif
 #elif (defined __APPLE__)
     #define PLATFORM_MACOSX 1
+#elif (defined __SWITCH__)
+    #define PLATFORM_SWITCH 1
 #else
   #warning "UNKNOWN PLATFORM IDENTIFIED!!!!"
   #define PLATFORM_UNKNOWN 1
 #endif
 
-#if PLATFORM_LINUX || PLATFORM_MACOSX
+#if PLATFORM_LINUX || PLATFORM_MACOSX || PLATFORM_SWITCH
   #ifndef PLATFORM_UNIX
     #define PLATFORM_UNIX 1
   #endif

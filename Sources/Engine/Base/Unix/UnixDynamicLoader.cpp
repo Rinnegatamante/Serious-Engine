@@ -2,7 +2,16 @@
 
 /* rcg10072001 Implemented. */
 
-#include <dlfcn.h>
+#ifdef PLATFORM_SWITCH // no dlfcn at all
+ #define RTLD_GLOBAL 1
+ #define RTLD_LAZY 2
+ static inline const char *dlerror() { return nullptr; }
+ static inline void *dlopen(const char *name, int flags) { return nullptr; }
+ static inline void *dlsym(void *module, const char *sym) { return nullptr; }
+ static inline void dlclose(void *module) { }
+#else
+ #include <dlfcn.h>
+#endif
 
 #include <Engine/Engine.h>
 #include <Engine/Base/DynamicLoader.h>

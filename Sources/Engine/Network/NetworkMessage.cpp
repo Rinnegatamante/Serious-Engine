@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <Engine/Base/ListIterator.inl>
 
-static struct ErrorCode ErrorCodes[] = {
+static struct ErrorCodeInfo ErrorCodes[] = {
 // message types
   ERRORCODE(MSG_REQ_ENUMSERVERS, "MSG_REQ_ENUMSERVERS"),
   ERRORCODE(MSG_SERVERINFO, "MSG_SERVERINFO"),
