@@ -3,7 +3,6 @@
 #include <Engine/Engine.h>
 #include <Engine/Base/DynamicLoader.h>
 #include <Engine/Base/NX/FakeExports.h>
-#include <iostream>
 
 // this is used to statically build a map of exports
 // see lib sources for more
