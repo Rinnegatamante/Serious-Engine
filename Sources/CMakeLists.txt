@@ -122,6 +122,8 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-Wno-missing-braces)
   add_compile_options(-Wno-overloaded-virtual)
   add_compile_options(-Wno-invalid-offsetof)
+  add_compile_options(-Wno-address)
+  add_compile_options(-Wno-nonnull-compare)
   MESSAGE(WARNING, "re-enable some of the warnings some day!")
 
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
@@ -1030,6 +1032,13 @@ if(FREEBSD)
     endif()
 endif()
 
+set(BINARY_NAME "ssam")
+if(TFE)
+    set(BINARY_NAME "ssam-tfe")
+endif()
+
+set_target_properties(ssam PROPERTIES OUTPUT_NAME ${BINARY_NAME})
+
 if(SWITCH_LIBNX)
     target_link_libraries(ssam ${ENTITIESMPLIB})
     target_link_libraries(ssam ${GAMEMPLIB})
@@ -1052,13 +1061,9 @@ if(SWITCH_LIBNX)
     endif()
 
     add_custom_command(TARGET ssam POST_BUILD
-      COMMAND aarch64-none-elf-strip -o "${CMAKE_BINARY_DIR}/ssam_stripped" "${CMAKE_BINARY_DIR}/ssam"
-      COMMAND elf2nro "${CMAKE_BINARY_DIR}/ssam_stripped" "${CMAKE_BINARY_DIR}/${NRONAME}.nro" --icon="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg" --nacp="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg"
+      COMMAND aarch64-none-elf-strip -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}_stripped" "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
+      COMMAND elf2nro "${CMAKE_BINARY_DIR}/${BINARY_NAME}_stripped" "${CMAKE_BINARY_DIR}/${NRONAME}.nro" --icon="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg" --nacp="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg"
     )
-endif()
-
-if(TFE)
- set_target_properties(ssam PROPERTIES OUTPUT_NAME "ssam-tfe")
 endif()
 
 # RAKE! Install Section.

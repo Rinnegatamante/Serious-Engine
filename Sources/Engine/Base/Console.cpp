@@ -202,14 +202,19 @@ void CConsole::PutString(const char *strString)
     fprintf(con_fLog, "%s", strString);
     fflush(con_fLog);
   }
+
   // if needed, append to capture string
   if (con_bCapture) {
     con_strCapture+=strString;
   }
 
-  // if dedicated server
+  // if dedicated server or running on Switch with nxlink
+#if defined __SWITCH__
+  {
+#else
   extern BOOL _bDedicatedServer;
   if (_bDedicatedServer) {
+#endif
     // print to output
     printf("%s", strString);
   }

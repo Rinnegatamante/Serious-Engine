@@ -372,6 +372,8 @@ Type Quaternion<Type>::EPS(Type orig) const
 {
 #ifdef PLATFORM_PANDORA
     if ((orig <= 1e-4f) && (orig >= -1e-4f))
+#elif defined PLATFORM_SWITCH
+    if ((orig <= 1e-5f) && (orig >= -1e-5f))
 #else
     if ((orig <= 10e-6f) && (orig >= -10e-6f))
 #endif

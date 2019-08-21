@@ -9,6 +9,14 @@
 #include <io.h>
 #endif
 
+#ifdef PLATFORM_SWITCH
+#define DEFAULT_RES_W 1280
+#define DEFAULT_RES_H 720
+#else
+#define DEFAULT_RES_W 640
+#define DEFAULT_RES_H 480
+#endif
+
 #include "MainWindow.h"
 #include <Engine/CurrentVersion.h>
 #include <Engine/Templates/Stock_CSoundData.h>
@@ -1922,7 +1930,7 @@ static void SizeToResolution(PIX pixSizeI, PIX pixSizeJ, INDEX &iRes)
   // if none was found, search for default 
   for(iRes=0; iRes<_ctResolutions; iRes++) {
     CDisplayMode &dm = _admResolutionModes[iRes];
-    if (dm.dm_pixSizeI==640 && dm.dm_pixSizeJ==480) {
+    if (dm.dm_pixSizeI==DEFAULT_RES_W && dm.dm_pixSizeJ==DEFAULT_RES_H) {
       return;
     }
   }

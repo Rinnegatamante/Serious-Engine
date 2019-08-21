@@ -42,7 +42,7 @@ extern "C" void Shader_Detail(void);
 
 /* exports */
 
-static CFakeLib exp_Shaders("Shaders", {
+static CFakeLib exp_Shaders("Shaders" DLLPOSTFIX, {
   { "Shader_Specular", (void*)&Shader_Specular }, 
   { "Shader_Reflection", (void*)&Shader_Reflection }, 
   { "Shader_Translucent", (void*)&Shader_Translucent }, 

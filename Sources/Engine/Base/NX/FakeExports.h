@@ -7,6 +7,12 @@
 #include <map>
 #include <initializer_list>
 
+#ifdef NDEBUG
+#define DLLPOSTFIX
+#else
+#define DLLPOSTFIX "D"
+#endif
+
 class CFakeLib
 {
 public:

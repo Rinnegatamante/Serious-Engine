@@ -7,6 +7,10 @@ extern "C" CGame *GAME_Create(void);
 
 /* exports */
 
-static CFakeLib exp_GameMP("GameMP", {
+#ifdef FIRST_ENCOUNTER
+static CFakeLib exp_Game("Game" DLLPOSTFIX, {
+#else
+static CFakeLib exp_GameMP("GameMP" DLLPOSTFIX, {
+#endif
   { "GAME_Create", (void*)&GAME_Create }, 
 });

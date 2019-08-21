@@ -19,6 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   #pragma once
 #endif
 
+#ifdef PLATFORM_UNIX
+typedef pthread_t THREADID;
+#define THREADID_NONE nullptr
+#else
+typedef ULONG THREADID;
+#define THREADID_NONE 0
+#endif
+
 // intra-process mutex (only used by thread of same process)
 class CTCriticalSection {
 public:
@@ -35,7 +43,7 @@ public:
 
 private:
   ULONG LockCounter;
-  ULONG owner;
+  THREADID owner;
 };
 
 // lock object for locking a mutex with automatic unlocking

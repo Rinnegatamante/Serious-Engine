@@ -479,7 +479,11 @@ public:
 
   // get amount of memory used by this object
   SLONG GetUsedMemory(void);
-};
+}
+#ifdef __arm__
+__attribute__((aligned(64)))
+#endif
+;
 
 // get pointer to embedding brush polygon
 inline CBrushPolygon *CBrushShadowMap::GetBrushPolygon(void) {

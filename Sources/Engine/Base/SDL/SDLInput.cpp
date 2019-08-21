@@ -364,7 +364,6 @@ int SE_SDL_InputEventPoll(SDL_Event *sdlevent)
     return 0;
 } // SE_SDL_InputEventPoll
 
-
 #if 0  // !!! FIXME:  Can we support this?
 // --------- 2ND MOUSE HANDLING
 
@@ -669,7 +668,9 @@ void CInput::DisableInput( void)
   // skip if allready disabled
   if( !inp_bInputEnabled) return;
 
+#ifndef __SWITCH__  // nuh uh
   SDL_JoystickEventState(SDL_DISABLE);
+#endif
 
   // show mouse on screen
   SDL_SetRelativeMouseMode(SDL_FALSE);

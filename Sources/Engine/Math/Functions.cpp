@@ -55,6 +55,7 @@ void Snap( ANGLE &angDest, ANGLE angStep)
 }
 #endif
 
+#if 0
 double adSinQuadrants[4][2] =
 {
   {1.0, 0.0},
@@ -92,3 +93,4 @@ FLOAT Tan(ANGLE a)
 {
   return Sin(a)/Cos(a);
 }
+#endif

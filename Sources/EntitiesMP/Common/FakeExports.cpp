@@ -148,7 +148,7 @@ extern "C" CDLLEntityClass CEnemyFly_DLLClass;
 
 /* exports */
 
-static CFakeLib exp_EntitiesMP("EntitiesMP", {
+static CFakeLib exp_EntitiesMP("EntitiesMP" DLLPOSTFIX, {
   { "CTouchField_DLLClass", (void*)&CTouchField_DLLClass }, 
   { "CMusicChanger_DLLClass", (void*)&CMusicChanger_DLLClass }, 
   { "CPyramidSpaceShipMarker_DLLClass", (void*)&CPyramidSpaceShipMarker_DLLClass }, 

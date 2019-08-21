@@ -57,16 +57,12 @@ static int nxlink_sock = -1;
 
 extern "C" void userAppInit(void) {
   socketInitializeDefault();
-#ifndef NDEBUG
   nxlink_sock = nxlinkStdio();
-#endif
 }
 
 extern "C" void userAppExit(void) {
-#ifndef NDEBUG
   if (nxlink_sock >= 0)
     close(nxlink_sock);
-#endif
   socketExit();
 }
 
@@ -440,6 +436,8 @@ static void SetupMemoryManager(void)
       sys_iRAMPhys = 512;
     fclose(esrev);
   };
+  #elif defined PLATFORM_SWITCH
+  sys_iRAMPhys = 3072; // expect app mode
   #else
   sys_iRAMPhys = 1;  // !!! FIXME: This is bad. Bad. BAD.
   #endif

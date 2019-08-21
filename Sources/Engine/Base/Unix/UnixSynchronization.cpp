@@ -12,7 +12,7 @@ CTCriticalSection::CTCriticalSection(void)
     cs_pvObject = (void *) new pthread_mutex_t;
     pthread_mutex_init((pthread_mutex_t *) cs_pvObject, NULL);
     LockCounter = 0;
-    owner = 0;
+    owner = THREADID_NONE;
 }
 
 CTCriticalSection::~CTCriticalSection(void)
@@ -25,12 +25,12 @@ INDEX CTCriticalSection::Lock(void)
 {
     if (owner == pthread_self())
         return(++LockCounter);
-    if(owner==0 && LockCounter) {
+    if(owner==THREADID_NONE && LockCounter) {
         //printf("Warning, suspicious mutex state, force unlocking...\n");
         pthread_mutex_unlock((pthread_mutex_t *) cs_pvObject);
         LockCounter=0;
     }
-    if(owner!=0) {
+    if(owner!=THREADID_NONE) {
       // do something???
     }
     pthread_mutex_lock((pthread_mutex_t *) cs_pvObject);
@@ -59,7 +59,7 @@ INDEX CTCriticalSection::Unlock(void)
             if (--LockCounter == 0)
             {
                 int ret = pthread_mutex_unlock((pthread_mutex_t *) cs_pvObject);
-                owner = 0;
+                owner = THREADID_NONE;
             }
         }
     }

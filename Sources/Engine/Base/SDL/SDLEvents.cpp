@@ -18,6 +18,50 @@ SDL_EventType WM_PAINT;
 //  making sure all SDL events tunnel through one function.
 extern int SE_SDL_InputEventPoll(SDL_Event *event);
 
+#ifdef PLATFORM_SWITCH
+#include <switch.h>
+
+// this is only used in GUI stuff, so joystick emulates keyboard keys
+
+static const int joy2key[] = {
+  /*[KEY_A]      =*/ VK_RETURN,
+  /*[KEY_B]      =*/ SDLK_BACKSPACE,
+  /*[KEY_X]      =*/ VK_DELETE,
+  /*[KEY_Y]      =*/ VK_SPACE,
+                     -1,
+                     -1,
+  /*[KEY_L]      =*/ VK_PRIOR,
+  /*[KEY_R]      =*/ VK_NEXT,
+  /*[KEY_ZL]     =*/ VK_LSHIFT,
+  /*[KEY_ZR]     =*/ VK_RSHIFT,
+  /*[KEY_PLUS]   =*/ VK_ESCAPE,
+  /*[KEY_MINUS]  =*/ SDLK_BACKQUOTE,
+  /*[KEY_DLEFT]  =*/ VK_LEFT,
+  /*[KEY_DUP]    =*/ VK_UP,
+  /*[KEY_DRIGHT] =*/ VK_RIGHT,
+  /*[KEY_DDOWN]  =*/ VK_DOWN,
+};
+
+#define NUMJOYBINDS (sizeof(joy2key) / sizeof(joy2key[0]))
+
+static int joystate[NUMJOYBINDS] = { 0 };
+
+static inline int SE_SDL_JoyToKey(int button)
+{
+    if (button >= 0 && button < NUMJOYBINDS)
+        return joy2key[button];
+    return -1;
+}
+
+static inline int SE_SDL_KeyToJoy(int key)
+{
+    for (int i = 0; i < NUMJOYBINDS; ++i)
+        if (joy2key[i] == key)
+            return i;
+    return -1;
+}
+
+#endif
 
 // !!! FIXME: maybe not try to emulate win32 here?
 BOOL PeekMessage(MSG *msg, void *hwnd, UINT wMsgFilterMin,
@@ -79,6 +123,17 @@ BOOL PeekMessage(MSG *msg, void *hwnd, UINT wMsgFilterMin,
                     msg->message = (sdlevent.button.state == SDL_PRESSED) ? WM_RBUTTONDOWN : WM_RBUTTONUP;
                 return TRUE;
 
+#ifdef PLATFORM_SWITCH
+            // map some joystick buttons to keys, since this whole thing is only used in UI
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+                msg->message = (sdlevent.type==SDL_JOYBUTTONDOWN)?WM_KEYDOWN:WM_KEYUP;
+                msg->wParam = SE_SDL_JoyToKey(sdlevent.jbutton.button);
+                if (sdlevent.jbutton.button < NUMJOYBINDS)
+                    joystate[sdlevent.jbutton.button] = (sdlevent.type==SDL_JOYBUTTONDOWN);
+                return TRUE;
+#endif
+
             case SDL_WINDOWEVENT:
                 if (sdlevent.window.event == SDL_WINDOWEVENT_EXPOSED)
                 {
@@ -114,8 +169,8 @@ void DispatchMessage(MSG *msg)
 SHORT GetKeyState(int vk)
 {
     SHORT retval = 0;
-#ifdef PLATFORM_PANDORA
-    Uint8 *keystate = SDL_GetKeyboardState(NULL);
+#if defined(PLATFORM_PANDORA) || defined(PLATFORM_SWITCH)
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 #endif
 
     switch (vk)
@@ -145,7 +200,13 @@ SHORT GetKeyState(int vk)
 
         default:
             STUBBED("this can't possibly be right, yeah?");
-            #ifdef PLATFORM_PANDORA
+            #if defined(PLATFORM_SWITCH)
+            // check joystick "overlay" first
+            vk = SE_SDL_KeyToJoy(vk);
+            if (vk >= 0 && joystate[vk])
+                retval = 0x8000;
+            #endif
+            #if defined(PLATFORM_PANDORA) || defined(PLATFORM_SWITCH)
             if (keystate[SDL_GetScancodeFromKey((SDL_Keycode)vk)])
             #else
             if (SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey((SDL_Keycode)vk)])

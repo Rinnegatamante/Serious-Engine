@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Engine/Base/Priority.inl>
 
 // !!! FIXME: use SDL timer code instead and rdtsc never?
-#if (defined PLATFORM_UNIX) && !defined(__GNU_INLINE_X86_32__)
+#if (USE_PORTABLE_C)
 #define USE_GETTIMEOFDAY 1
 #endif
 
@@ -37,16 +37,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/time.h>
 #endif
 
-#if PLATFORM_FREEBSD
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif
-
 // Read the Pentium TimeStampCounter (or something like that).
 static inline __int64 ReadTSC(void)
 {
 #if USE_GETTIMEOFDAY
-#ifdef PLATFORM_PANDORA
+#if defined PLATFORM_PANDORA
   struct timespec tp;
   clock_gettime(CLOCK_MONOTONIC, &tp);
   return( (((__int64) tp.tv_sec) * 1000000000LL) + ((__int64) tp.tv_nsec));
@@ -64,7 +59,7 @@ static inline __int64 ReadTSC(void)
   }
   return mmRet;
 
-#elif (defined __GNU_INLINE_X86_32__)
+#elif (defined __GNU_INLINE__)
   __int64 mmRet;
   __asm__ __volatile__ (
     "rdtsc                    \n\t"
@@ -89,6 +84,9 @@ static inline __int64 ReadTSC(void)
 
 // current game time always valid for the currently active task
 THREADLOCAL(TIME, _CurrentTickTimer, 0.0f);
+
+// "tsc" value at game start
+THREADLOCAL(__int64, _StartTSC, 0);
 
 // CTimer implementation
 
@@ -161,8 +159,8 @@ void CTimer_TimerFunc_internal(void)
     CTimerValue tvTimeNow = _pTimer->GetHighPrecisionTimer();
     TIME        tmTickNow = _pTimer->tm_RealTimeTimer;
     // calculate how long has passed since we have last been on time
-    //TIME tmTimeDelay = (TIME)(tvTimeNow - _pTimer->tm_tvLastTimeOnTime).GetSeconds();
-    //TIME tmTickDelay =       (tmTickNow - _pTimer->tm_tmLastTickOnTime);
+    TIME tmTimeDelay = (TIME)(tvTimeNow - _pTimer->tm_tvLastTimeOnTime).GetSeconds();
+    TIME tmTickDelay =       (tmTickNow - _pTimer->tm_tmLastTickOnTime);
 
     _sfStats.StartTimer(CStatForm::STI_TIMER);
     // if we are keeping up to time (more or less)
@@ -209,14 +207,13 @@ Uint32 CTimer_TimerFunc_SDL(Uint32 interval, void* param)
 
 #pragma inline_depth()
 
-
-#ifdef PLATFORM_WIN32 // DG: not used on other platforms
 #define MAX_MEASURE_TRIES 5
 static INDEX _aiTries[MAX_MEASURE_TRIES];
 
 // Get processor speed in Hertz
 static __int64 GetCPUSpeedHz(void)
 {
+#ifdef PLATFORM_WIN32
   // get the frequency of the 'high' precision timer
   __int64 llTimerFrequency;
   BOOL bPerformanceCounterPresent = QueryPerformanceFrequency((LARGE_INTEGER*)&llTimerFrequency);
@@ -297,8 +294,14 @@ static __int64 GetCPUSpeedHz(void)
     // use measured value
     return (__int64)slSpeedRead*1000000;
   }
+#else
+
+    STUBBED("I hope this isn't critical...");
+    return(1);
+
+#endif
+
 }
-#endif // PLATFORM_WIN32
 
 
 #if PLATFORM_MACOSX
@@ -322,7 +325,7 @@ CTimer::CTimer(BOOL bInterrupt /*=TRUE*/)
 
 #if USE_GETTIMEOFDAY
   // just use gettimeofday.
-  #ifdef PLATFORM_PANDORA
+  #if defined PLATFORM_PANDORA
   tm_llCPUSpeedHZ = tm_llPerformanceCounterFrequency = 1000000000LL;
   #else
   tm_llCPUSpeedHZ = tm_llPerformanceCounterFrequency = 1000000;
@@ -340,13 +343,6 @@ CTimer::CTimer(BOOL bInterrupt /*=TRUE*/)
 
 #elif PLATFORM_MACOSX
   tm_llPerformanceCounterFrequency = tm_llCPUSpeedHZ = ((__int64) GetCPUSpeed()) * 1000000;
-
-#elif PLATFORM_FREEBSD
-  __int64 mhz = 0;
-  size_t len = sizeof(mhz);
-
-  sysctlbyname("hw.clockrate", &mhz, &len, NULL, 0);
-  tm_llPerformanceCounterFrequency = tm_llCPUSpeedHZ = (__int64) (mhz * 1000000);
 
 #else
   // !!! FIXME : This is an ugly hack.
@@ -396,6 +392,7 @@ CTimer::CTimer(BOOL bInterrupt /*=TRUE*/)
   // clear counters
   _CurrentTickTimer = TIME(0);
   tm_RealTimeTimer = TIME(0);
+  _StartTSC = ReadTSC();
 
   tm_tmLastTickOnTime = TIME(0);
   tm_tvLastTimeOnTime = GetHighPrecisionTimer();
@@ -517,7 +514,7 @@ void CTimer::HandleTimerHandlers(void)
  */
 CTimerValue CTimer::GetHighPrecisionTimer(void)
 {
-  return ReadTSC();
+  return ReadTSC() - _StartTSC;
 }
 
 /*
