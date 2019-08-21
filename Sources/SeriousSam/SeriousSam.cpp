@@ -33,7 +33,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <Engine/CurrentVersion.h>
 #include <GameMP/Game.h>
 #define DECL_DLL
+#ifdef FIRST_ENCOUNTER
+#include <Entities/Global.h>
+#else
 #include <EntitiesMP/Global.h>
+#endif
 #include "resource.h"
 #include "SplashScreen.h"
 #include "MainWindow.h"
