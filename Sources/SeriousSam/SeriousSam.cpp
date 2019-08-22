@@ -1524,8 +1524,10 @@ BOOL TryToSetDisplayMode( enum GfxAPIType eGfxAPI, INDEX iAdapter, PIX pixSizeI,
     pdpNormal = NULL;
   }
 
+#ifndef PLATFORM_SWITCH // HACK: can't close and reopen on the Switch
   // close the application window
   CloseMainWindow();
+#endif
 
   // try to set new display mode
   BOOL bSuccess;

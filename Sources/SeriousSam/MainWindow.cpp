@@ -244,9 +244,20 @@ void OpenMainWindowNormal( PIX pixSizeI, PIX pixSizeJ)
   ResetMainWindowNormal();
 
 #else
-  SDL_snprintf( achWindowTitle, sizeof (achWindowTitle), TRANS("Serious Sam (Window %dx%d)"), pixSizeI, pixSizeJ);
-  _hwndMain = SDL_CreateWindow(achWindowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL);
-  if( _hwndMain==NULL) FatalError(TRANS("Cannot open main window!"));
+# ifdef PLATFORM_SWITCH
+  // just resize the existing window
+  if (_hwndMain != NULL)
+  {
+    SDL_SetWindowFullscreen((SDL_Window*)_hwndMain, 0);
+    SDL_SetWindowSize((SDL_Window*)_hwndMain, pixSizeI, pixSizeJ);
+  }
+  else
+# endif
+  {
+    SDL_snprintf( achWindowTitle, sizeof (achWindowTitle), TRANS("Serious Sam (Window %dx%d)"), pixSizeI, pixSizeJ);
+    _hwndMain = SDL_CreateWindow(achWindowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL);
+    if( _hwndMain==NULL) FatalError(TRANS("Cannot open main window!"));
+  }
   SE_UpdateWindowHandle( _hwndMain);
   _pixLastSizeI = pixSizeI;
   _pixLastSizeJ = pixSizeJ;
@@ -281,9 +292,20 @@ void OpenMainWindowFullScreen( PIX pixSizeI, PIX pixSizeJ)
   ShowWindow(    _hwndMain, SW_SHOWNORMAL);
 
 #else
-  SDL_snprintf( achWindowTitle, sizeof (achWindowTitle), TRANS("Serious Sam (FullScreen %dx%d)"), pixSizeI, pixSizeJ);
-  _hwndMain = SDL_CreateWindow(achWindowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
-  if( _hwndMain==NULL) FatalError(TRANS("Cannot open main window!"));
+# ifdef PLATFORM_SWITCH
+  // just resize the existing window
+  if (_hwndMain != NULL)
+  {
+    SDL_SetWindowFullscreen((SDL_Window*)_hwndMain, SDL_WINDOW_FULLSCREEN);
+    SDL_SetWindowSize((SDL_Window*)_hwndMain, pixSizeI, pixSizeJ);
+  }
+  else
+# endif
+  {
+    SDL_snprintf( achWindowTitle, sizeof (achWindowTitle), TRANS("Serious Sam (FullScreen %dx%d)"), pixSizeI, pixSizeJ);
+    _hwndMain = SDL_CreateWindow(achWindowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pixSizeI, pixSizeJ, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);
+    if( _hwndMain==NULL) FatalError(TRANS("Cannot open main window!"));
+  }
   SE_UpdateWindowHandle( _hwndMain);
   _pixLastSizeI = pixSizeI;
   _pixLastSizeJ = pixSizeJ;

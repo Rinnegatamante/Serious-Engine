@@ -70,6 +70,12 @@ static CResolution _areResolutions[] =
   // NTSC HDTV widescreen
   {  848,  480 },
   {  856,  480 },
+
+#ifdef PLATFORM_SWITCH
+  // some smol resolutions for performance
+  {  640,  360 },
+  {  960,  540 },
+#endif
 };
 // THIS NUMBER MUST NOT BE OVER 25! (otherwise change it in adapter.h)
 static const INDEX MAX_RESOLUTIONS = sizeof(_areResolutions)/sizeof(_areResolutions[0]);
