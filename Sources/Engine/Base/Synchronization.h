@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef PLATFORM_UNIX
-typedef pthread_t THREADID;
+typedef void* THREADID;
 #define THREADID_NONE nullptr
 #else
 typedef ULONG THREADID;

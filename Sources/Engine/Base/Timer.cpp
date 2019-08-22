@@ -30,7 +30,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // !!! FIXME: use SDL timer code instead and rdtsc never?
 #if (USE_PORTABLE_C)
-#define USE_GETTIMEOFDAY 1
+# ifdef PLATFORM_SWITCH
+#  define USE_SDLTICKS 1
+# else
+#  define USE_GETTIMEOFDAY 1
+# endif
 #endif
 
 #if USE_GETTIMEOFDAY
@@ -41,15 +45,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static inline __int64 ReadTSC(void)
 {
 #if USE_GETTIMEOFDAY
-#if defined PLATFORM_PANDORA
+# if defined PLATFORM_PANDORA
   struct timespec tp;
   clock_gettime(CLOCK_MONOTONIC, &tp);
   return( (((__int64) tp.tv_sec) * 1000000000LL) + ((__int64) tp.tv_nsec));
-#else
+# else
   struct timeval tv;
   gettimeofday(&tv, NULL);
   return( (((__int64) tv.tv_sec) * 1000000) + ((__int64) tv.tv_usec) );
-#endif
+# endif
+#elif USE_SDLTICKS
+  return SDL_GetPerformanceCounter();
 #elif (defined __MSVC_INLINE__)
   __int64 mmRet;
   __asm {
@@ -331,6 +337,10 @@ CTimer::CTimer(BOOL bInterrupt /*=TRUE*/)
   tm_llCPUSpeedHZ = tm_llPerformanceCounterFrequency = 1000000;
   #endif
 
+#elif USE_SDLTICKS
+  // use SDL's perf counter thing
+  tm_llCPUSpeedHZ = tm_llPerformanceCounterFrequency = SDL_GetPerformanceFrequency();
+
 #elif PLATFORM_WIN32
   { // this part of code must be executed as precisely as possible
     CSetPriority sp(REALTIME_PRIORITY_CLASS, THREAD_PRIORITY_TIME_CRITICAL);
@@ -514,7 +524,7 @@ void CTimer::HandleTimerHandlers(void)
  */
 CTimerValue CTimer::GetHighPrecisionTimer(void)
 {
-  return ReadTSC() - _StartTSC;
+  return ReadTSC();
 }
 
 /*
