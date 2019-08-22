@@ -1642,7 +1642,12 @@ void CSessionState::ReadWorldAndState_t(CTStream *pstr)   // throw char *
 
   if (CTFileName(pstr->GetDescription()).FileExt()==".dem" &&
     GetFileTimeStamp_t(pstr->GetDescription())<=GetFileTimeStamp_t(_pNetwork->ga_fnmWorld)) {
+#ifdef PLATFORM_SWITCH
+    // do not throw here because ftpd tends to fuck up the dates
+    CPrintF(
+#else
     ThrowF_t(
+#endif
       TRANS("Cannot play demo because file '%s'\n"
       "is older than file '%s'!\n"),
       (const char *) CTString(pstr->GetDescription()),
