@@ -164,6 +164,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_definitions(-DPRAGMA_ONCE=1)
     include_directories("$ENV{PORTLIBS_PREFIX}/include")
     include_directories("$ENV{DEVKITPRO}/libnx/include")
+    add_compile_options(-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -mcpu=cortex-a57+crc+fp+simd)
     add_compile_options(-fsigned-char -Wno-strict-aliasing -Wfatal-errors -Wno-sign-compare)
   endif()
 
@@ -1055,14 +1056,18 @@ if(SWITCH_LIBNX)
     target_link_libraries(ssam "nx")
     target_link_libraries(ssam "m")
 
-    set(NRONAME "ssam_tse")
     if(TFE)
         set(NRONAME "ssam_tfe")
+        set(GAMENAME "Serious Sam: The First Encounter")
+    else()
+        set(NRONAME "ssam_tse")
+        set(GAMENAME "Serious Sam: The Second Encounter")
     endif()
 
     add_custom_command(TARGET ssam POST_BUILD
+      COMMAND nacptool --create "${GAMENAME}" "Croteam, icculus, fgsfds" "1.0.10-nx-1" "${CMAKE_BINARY_DIR}/${NRONAME}.nacp"
       COMMAND aarch64-none-elf-strip -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}_stripped" "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-      COMMAND elf2nro "${CMAKE_BINARY_DIR}/${BINARY_NAME}_stripped" "${CMAKE_BINARY_DIR}/${NRONAME}.nro" --icon="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg" --nacp="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg"
+      COMMAND elf2nro "${CMAKE_BINARY_DIR}/${BINARY_NAME}_stripped" "${CMAKE_BINARY_DIR}/${NRONAME}.nro" --icon="${CMAKE_SOURCE_DIR}/../NX/${NRONAME}.jpg" --nacp="${CMAKE_BINARY_DIR}/${NRONAME}.nacp"
     )
 endif()
 
