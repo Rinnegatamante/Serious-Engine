@@ -473,7 +473,9 @@ BOOL Init( HINSTANCE hInstance, int nCmdShow, CTString strCmdLine)
 #ifdef PLATFORM_UNIX
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1)
     FatalError("SDL_Init(VIDEO|AUDIO) failed. Reason: [%s].", SDL_GetError());
+# ifndef PLATFORM_SWITCH // SDL_Quit is called in userAppExit
   atexit(atexit_sdlquit);
+# endif
   SDL_Init(SDL_INIT_JOYSTICK);  // don't care if this fails.
 #endif
 
@@ -690,7 +692,7 @@ void End(void)
   DirectoryLockOff();
   SE_EndEngine();
 
-#if PLATFORM_UNIX
+#if PLATFORM_UNIX && !PLATFORM_SWITCH // see userAppExit
   SDL_Quit();
 #endif
 }

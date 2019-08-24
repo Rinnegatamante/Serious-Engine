@@ -209,7 +209,7 @@ void CConsole::PutString(const char *strString)
   }
 
   // if dedicated server or running on Switch with nxlink
-#if defined __SWITCH__
+#if defined PLATFORM_SWITCH
   {
 #else
   extern BOOL _bDedicatedServer;

@@ -2106,6 +2106,37 @@ vtxRest:
 vtxEnd:
       pop     ebx
     }
+#elif defined(__ARM_NEON__)
+    register float tc_u __asm__("s0") = fTexCorrU;
+    register float tc_v __asm__("s1") = fTexCorrV;
+    const void *tc_src = pvTexCoord->vector;
+    GFXTexCoord *tc_dst = ptexSrfBase;
+    int tc_cnt = ctSrfVx;
+    __asm__ __volatile__ (
+      "vmov     d1, d0\n"
+      "0:\n"
+      "subs     %[c], #2\n"
+      "blt      1f\n"
+      "vld1.32  {d2}, [%[src]]\n"
+      "add      %[src], %[src_s]\n"
+      "vld1.32  {d3}, [%[src]]\n"
+      "add      %[src], %[src_s]\n"
+      "vmul.f32 q1, q1, q0\n"
+      "pld      [%[src], #64]\n"
+      "vst1.32  {q1}, [%[dst]]!\n"
+      "b        0b\n"
+      "1:\n"
+      "tst      %[c], #1\n"
+      "beq      2f\n"
+      "vld1.32  {d2}, [%[src]]\n"
+      "vmul.f32 d2, d2, d0\n"
+      "vst1.32  {d2}, [%[dst]]\n"
+      "2:\n"
+      : [c] "=&r"(tc_cnt), [src] "=&r"(tc_src), [dst] "=&r"(tc_dst)
+      :     "[c]"(tc_cnt),     "[src]"(tc_src),     "[dst]"(tc_dst),
+        "t"(tc_u), "t"(tc_v), [src_s] "I"(sizeof(pvTexCoord[0]))
+      : "d1", "q1", "cc", "memory"
+    );
 #else
     // setup texcoord array
     for( INDEX iSrfVx=0; iSrfVx<ctSrfVx; iSrfVx++) {

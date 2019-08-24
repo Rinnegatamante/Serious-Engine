@@ -57,13 +57,23 @@ static int nxlink_sock = -1;
 
 extern "C" void userAppInit(void) {
   socketInitializeDefault();
+#ifndef NDEBUG
   nxlink_sock = nxlinkStdio();
+#endif
 }
 
 extern "C" void userAppExit(void) {
+  SE_EndEngine();
+  if (SDL_WasInit(SDL_INIT_VIDEO))
+  {
+    SDL_Quit();
+    nvExit();
+    viExit();
+  }
   if (nxlink_sock >= 0)
     close(nxlink_sock);
   socketExit();
+  appletUnlockExit();
 }
 
 #endif
@@ -308,12 +318,18 @@ static void AnalyzeApplicationPath(void)
   } 
   // remove 'debug' from app path if needed
   if( strnicmp( pstr, (CTString(dirsep)+"gubed"), 5+seplen)==0) pstr += (5 + seplen);
+#ifdef PLATFORM_SWITCH
+  // do not chomp off the last directory in path, we're running from the game dir, not 'Bin',
+  // because that way hbmenu can see our executable
+  char *pstrFin = pstr;
+#else
   if( strncmp(pstr, dirsep, seplen) == 0) pstr += seplen;
   char *pstrFin = strstr( pstr, dirsep);
   if( pstrFin==NULL) {
     strcpy( pstr, dirsep);
     pstrFin = pstr;
   }
+#endif
   // copy that to the path
   StrRev(pstrFin);
   strncpy( strDirPath, pstrFin, sizeof(strDirPath)-1);
@@ -546,6 +562,9 @@ static void PlatformSpecificInit(void)
   WM_RBUTTONUP = (SDL_EventType) SDL_RegisterEvents(1);
   WM_PAINT = (SDL_EventType) SDL_RegisterEvents(1);
   #endif
+  #if PLATFORM_SWITCH
+  appletLockExit();
+  #endif
 }
 
 // startup engine 
@@ -777,6 +796,11 @@ static void PlatformSpecificDeinit(void)
 // shutdown entire engine
 ENGINE_API void SE_EndEngine(void)
 {
+  static BOOL bAlreadyEnded = FALSE;
+
+  if (bAlreadyEnded) return;
+  bAlreadyEnded = TRUE; // don't deinit twice
+
   PlatformSpecificDeinit();
 
   // free stocks

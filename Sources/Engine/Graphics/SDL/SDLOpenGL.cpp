@@ -57,6 +57,9 @@ void CGfxLibrary::PlatformEndDriver_OGL(void)
 // creates OpenGL drawing context
 BOOL CGfxLibrary::CreateContext_OGL(HDC hdc)
 {
+#ifdef PLATFORM_SWITCH
+  if (go_hglRC) return TRUE; // already exists, can't recreate
+#endif
   SDL_Window *window = (SDL_Window *) hdc;
   if( !SetupPixelFormat_OGL( hdc, TRUE)) return FALSE;
   go_hglRC = SDL_GL_CreateContext(window);
@@ -113,9 +116,9 @@ BOOL CGfxLibrary::SetupPixelFormat_OGL( HDC hdc, BOOL bReport/*=FALSE*/)
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, gap_iStencilBits);
 
 #ifdef PLATFORM_SWITCH
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 #endif
 
   STUBBED("co-opt the existing T-buffer support for multisampling?");

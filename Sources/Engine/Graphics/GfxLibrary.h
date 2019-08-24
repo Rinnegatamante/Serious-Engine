@@ -196,12 +196,12 @@ private:
   // start full-screen or windowed mode (pixSizeI=pixSizeJ=0 & iAdapter=0 if windowed)
   BOOL StartDisplayMode( enum GfxAPIType eAPI, INDEX iAdapter, PIX pixSizeI, PIX pixSizeJ,
                          enum DisplayDepth eColorDepth);
-  void StopDisplayMode(void);
+  void StopDisplayMode(BOOL bFinal=FALSE);
 
   // OpenGL specific
   void *OGL_GetProcAddress(const char *procname); // rcg10112001
   BOOL InitDriver_OGL( BOOL b3Dfx=FALSE);  // DLL init and function call adjustments
-  void EndDriver_OGL(void);
+  void EndDriver_OGL(BOOL bFinal=FALSE);
   void PlatformEndDriver_OGL(void); // rcg10112001
   void TestExtension_OGL( ULONG ulFlag, const char *strName); // if exist, add OpenGL extension to flag and list
   void AddExtension_OGL(  ULONG ulFlag, const char *strName); // unconditionally add OpenGL extension to flag and list

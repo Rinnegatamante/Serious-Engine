@@ -466,7 +466,7 @@ static void ClearFunctionPointers(void)
 
 
 // shutdown OpenGL driver
-void CGfxLibrary::EndDriver_OGL(void)
+void CGfxLibrary::EndDriver_OGL(BOOL bFinal)
 {
   // unbind all textures
   if( _pTextureStock!=NULL) {
@@ -483,8 +483,13 @@ void CGfxLibrary::EndDriver_OGL(void)
   _ptdFlat->td_tpLocal.Clear();
   _ptdFlat->Unbind();
 
-  PlatformEndDriver_OGL();
-  ClearFunctionPointers();
+#ifdef PLATFORM_SWITCH // deinit only on exit
+  if (bFinal)
+#endif
+  {
+    PlatformEndDriver_OGL();
+    ClearFunctionPointers();
+  }
 }
 
 

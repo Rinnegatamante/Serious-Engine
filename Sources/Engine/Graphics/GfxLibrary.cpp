@@ -1088,7 +1088,7 @@ CGfxLibrary::~CGfxLibrary()
   _aiCommonElements.Clear();
   _aiCommonQuads.Clear();
   // stop current display mode
-  StopDisplayMode();
+  StopDisplayMode(TRUE);
   // safe release of flat texture
   ASSERT( _ptdFlat!=NULL);
   _ptdFlat->td_pulFrames = NULL;
@@ -1477,7 +1477,7 @@ BOOL CGfxLibrary::StartDisplayMode( enum GfxAPIType eAPI, INDEX iAdapter, PIX pi
 
 
 // Stop display mode and shutdown API
-void CGfxLibrary::StopDisplayMode(void)
+void CGfxLibrary::StopDisplayMode(BOOL bFinal)
 {
   // release all cached shadows and models' arrays
   extern void Models_ClearVertexArrays(void);
@@ -1488,7 +1488,7 @@ void CGfxLibrary::StopDisplayMode(void)
   // shutdown API
   if( gl_eCurrentAPI==GAT_OGL)
   { // OpenGL
-    EndDriver_OGL();
+    EndDriver_OGL(bFinal);
     MonitorsOn();       // re-enable multimonitor support if disabled
     CDS_ResetMode();
   }

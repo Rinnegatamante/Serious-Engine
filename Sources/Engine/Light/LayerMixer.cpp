@@ -1807,14 +1807,14 @@ void CLayerMixer::MixOneMipmap(CBrushShadowMap *pbsm, INDEX iMipmap)
   );
 
 #else
-  register ULONG count = this->lm_pixCanvasSizeU * this->lm_pixCanvasSizeV;
+  ULONG count = this->lm_pixCanvasSizeU * this->lm_pixCanvasSizeV;
   #if PLATFORM_LITTLEENDIAN
   // Forces C fallback; BYTESWAP itself is a no-op on little endian.
-  register ULONG swapped = BYTESWAP32_unsigned(colAmbient);
+  ULONG swapped = BYTESWAP32_unsigned(colAmbient);
   #else
   STUBBED("actually need byteswap?");
   // (uses inline asm on MacOS PowerPC)
-  register ULONG swapped = colAmbient;
+  ULONG swapped = colAmbient;
   BYTESWAP(swapped);
   #endif
 

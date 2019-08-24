@@ -668,7 +668,7 @@ void CInput::DisableInput( void)
   // skip if allready disabled
   if( !inp_bInputEnabled) return;
 
-#ifndef __SWITCH__  // nuh uh
+#ifndef PLATFORM_SWITCH  // nuh uh
   SDL_JoystickEventState(SDL_DISABLE);
 #endif
 
