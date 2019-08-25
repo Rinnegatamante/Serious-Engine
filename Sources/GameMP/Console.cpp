@@ -16,6 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StdAfx.h"
 #include "LCDDrawing.h"
 
+#ifdef PLATFORM_SWITCH
+#include <Engine/Base/NX/TouchKeyboard.h>
+#endif
+
 extern CGame *_pGame;
 
 // console variables
@@ -315,6 +319,10 @@ static void Key_Return(void)
 {
   // ignore keydown return (keyup will be handled) - because of key bind to return
   //if( _pGame->gm_csConsoleState==CS_TALK) return;
+#ifdef PLATFORM_SWITCH
+  // call swkbd
+  strEditingLine = CTouchKeyboard::GetInput(CTString("Enter console command"), strEditingLine);
+#endif
 
   // clear editing line from whitespaces
   strEditingLine.TrimSpacesLeft();
