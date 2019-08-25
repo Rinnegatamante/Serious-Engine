@@ -932,7 +932,9 @@ set(ENGINE_SRCS
 
 if(SWITCH_LIBNX)
     # replace dl with a "fake dynamic loader"
+    # and add SWKBD
     set(ENGINE_SRCS ${ENGINE_SRCS}
+        Engine/Base/NX/TouchKeyboard.cpp
         Engine/Base/NX/FakeDynamicLoader.cpp
         Engine/Entities/FakeExports.cpp
         GameMP/FakeExports.cpp

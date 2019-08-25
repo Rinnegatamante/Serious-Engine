@@ -8,6 +8,10 @@
 #include "LevelInfo.h"
 #include "VarList.h"
 
+#ifdef PLATFORM_SWITCH
+#include <Engine/Base/NX/TouchKeyboard.h>
+#endif
+
 extern CFontData _fdBig;
 extern CFontData _fdMedium;
 extern CFontData _fdSmall;
@@ -438,6 +442,10 @@ void CMGEdit::OnActivate(void)
   ASSERT( mg_pstrToChange != NULL);
   PlayMenuSound( _psdPress);
   IFeel_PlayEffect("Menu_press");
+#ifdef PLATFORM_SWITCH
+  // call swkbd
+  mg_strText = CTouchKeyboard::GetInput(mg_strLabel, mg_strText);
+#endif
   SetText( mg_strText);
   mg_iCursorPos = strlen(mg_strText);
   mg_bEditing = TRUE;
