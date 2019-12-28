@@ -28,6 +28,26 @@ These have been modified to run correctly under the recent version of Windows. (
 Building
 --------
 
+### Switch
+
+You will need devkitA64 and some libraries, which you can obtain from devkitPro's Pacman repository:
+```
+[dkp-]pacman -S switch-mesa switch-libdrm_nouveau switch-libvorbis switch-libogg switch-sdl2 switch-zlib libnx devkitpro-pkgbuild-helpers
+```
+To build TSE:
+```
+cd Sources
+source /opt/devkitpro/switchvars.sh
+./build-switch.sh
+```
+To build TFE:
+```
+cd Sources
+source /opt/devkitpro/switchvars.sh
+./build-switch.sh -DTFE=TRUE
+```
+The resulting .nro file will appear in `Sources/switch-build/`.
+
 ### Windows
 
 To build Serious Engine 1, you'll need Visual Studio 2013 or 2015, Professional or Community edition ( https://www.visualstudio.com/post-download-vs?sku=community ).
