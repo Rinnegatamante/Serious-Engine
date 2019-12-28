@@ -2,7 +2,7 @@
 
 BASEDIR=$(dirname "$0")
 NCPU=`cat /proc/cpuinfo |grep vendor_id |wc -l`
-let $NCPU + 2
+let NCPU=$NCPU+2
 echo "Will build with 'make -j$NCPU' ... please edit this script if incorrect."
 
 set -e
@@ -20,6 +20,8 @@ cmake -G"Unix Makefiles" \
   -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DPKG_CONFIG_EXECUTABLE="$DEVKITPRO/portlibs/switch/bin/aarch64-none-elf-pkg-config" \
   -DECC="$BASEDIR/cmake-build/ecc" \
+  -DUSE_ASM=FALSE \
+  $1 \
   ..
 
 make -j$NCPU
