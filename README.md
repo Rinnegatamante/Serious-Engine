@@ -30,7 +30,13 @@ Building
 
 ### Switch
 
-You will need devkitA64 and some libraries, which you can obtain from devkitPro's Pacman repository:
+First, you need to build a version of the game (or at least ECC) for your host platform (Windows/Linux).
+
+Run the appropriate .sh script to do that. Ensure that `ecc` is in the `cmake-build` folder after that.
+
+You can use MSYS2/MinGW64 to build a Windows version.
+
+Then, you will need devkitA64 and some libraries, which you can obtain from devkitPro's Pacman repository:
 ```
 [dkp-]pacman -S switch-mesa switch-libdrm_nouveau switch-libvorbis switch-libogg switch-sdl2 switch-zlib libnx devkitpro-pkgbuild-helpers
 ```
