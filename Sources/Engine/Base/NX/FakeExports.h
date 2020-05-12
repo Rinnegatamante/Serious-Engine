@@ -4,6 +4,7 @@
   #pragma once
 #endif
 
+#include <string>
 #include <map>
 #include <initializer_list>
 
